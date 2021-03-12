@@ -1,62 +1,17 @@
+# built in
+import json
+# third party
 from flask import Flask
 from flask_restful import Resource, Api, reqparse, abort, marshal, fields
-
-import json
-import re
-import uuid
-
-from google_trans_new import google_translator
+# this package
+import translator
+# logging
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Initialize Flask
 app = Flask(__name__)
 api = Api(app)
-
-# Initialize Translator
-translator = google_translator()
-
-
-def translate(text, dest, src, regex):
-
-    protected_strings = {}
-    while re.search(regex, text):
-        new_uuid = str(uuid.uuid1())
-        protected_strings[new_uuid] = re.search(regex, text).group()
-        text = re.sub(regex, new_uuid, text, 1)
-        print(text)
-
-    if src is not None:
-        translation = translator.translate(text, dest, src)
-    else:
-        translation = translator.translate(text, dest)
-
-    print(translation)
-
-    if protected_strings:
-        print(protected_strings)
-        for k in protected_strings:
-            translation = translation.replace(k, protected_strings[k])
-
-    return translation.strip()
-
-
-def translate_json(my_dict, dest_lang, src_lang, regex):
-
-    my_dict = iterate_multidimensional(my_dict, dest_lang, src_lang, regex)
-
-    return my_dict
-
-
-def iterate_multidimensional(my_dict, dest_lang, src_lang, regex):
-    for k, v in my_dict.items():
-        if isinstance(v, dict):
-            print(k + ":")
-            iterate_multidimensional(v, dest_lang, src_lang, regex)
-            continue
-        if isinstance(v, str):
-            my_dict[k] = translate(my_dict[k], dest_lang, src_lang, regex)
-        print(k+" : "+str(v))
-
-    return my_dict
 
 
 # Resource: Translate
@@ -77,11 +32,11 @@ class Translate(Resource):
         print(args)
 
         if args["src_text"] is not None:
-            args["dest_text"] = translate(args["src_text"], args["dest_lang"], args["src_lang"], args["protected_text"])
+            args["dest_text"] = translator.translate(args["src_text"], args["dest_lang"], args["src_lang"], args["protected_text"])
 
         if args["src_json"] is not None:
             src_json = json.loads(args["src_json"].replace("\'", "\""))
-            args["dest_json"] = translate_json(src_json, args["dest_lang"], args["src_lang"], args["protected_text"])
+            args["dest_json"] = translator.translate_json(src_json, args["dest_lang"], args["src_lang"], args["protected_text"])
 
         return args, 201
 

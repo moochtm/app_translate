@@ -1,7 +1,10 @@
 import requests
 import json
 
-translate_api_endpoint = 'http://127.0.0.1:5000'
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+translate_api_endpoint = 'http://localhost:80'
 
 x = requests.get(translate_api_endpoint + '/translate?src_text=Can I have a choclate please.&dest_lang=zh')
 
@@ -12,13 +15,17 @@ test_dict = {
     "Str": "hello",
     "Str2": "This is a [protected] word!",
     "Int": 123,
-    "Nest": {"Nest": "hello [protected text]"}
+    "Nest": {"Nest": "hello {protected text}"}
+}
+
+test_dict = {
+    "Nest": {"Nest": "hello {protected text}"}
 }
 
 payload = {
     "src_json": test_dict,
     "dest_lang": "ko",
-    "protected_text": "\[.*?\]"
+    "protected_text": "\{.*?\}"
 }
 
 x = requests.get(translate_api_endpoint + '/translate', json=payload)
