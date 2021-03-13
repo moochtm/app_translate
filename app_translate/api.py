@@ -2,9 +2,9 @@
 import json
 # third party
 from flask import Flask
-from flask_restful import Resource, Api, reqparse, abort, marshal, fields
+from flask_restful import Resource, Api, reqparse
 # this package
-import translator
+from app_translate.functions import translator
 # logging
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -36,7 +36,7 @@ class Translate(Resource):
 
         if args["src_json"] is not None:
             src_json = json.loads(args["src_json"].replace("\'", "\""))
-            args["dest_json"] = translator.translate_json(src_json, args["dest_lang"], args["src_lang"], args["protected_text"])
+            args["dest_json"] = {} # translator.translate_json(src_json, args["dest_lang"], args["src_lang"], args["protected_text"])
 
         return args, 201
 
